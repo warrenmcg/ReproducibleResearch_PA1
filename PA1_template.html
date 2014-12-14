@@ -205,9 +205,9 @@ hr {
 
 <h1>Data Description</h1>
 
-<p>The data can be downloaded from the course website ([link][1]). This data was the number 
+<p>The data can be downloaded from the course website (<a href="https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip" title="Data">link</a>). This data was the number 
 of steps taken in 5 minute intervals each day, taken from an anonymous individual using a 
-personal activity monitoring device (like a [Fitbit][2], [Nike Fuelband][3], or [Jawbone Up][4]). 
+personal activity monitoring device (like a <a href="http://www.fitbit.com/" title="Fitbit">Fitbit</a>, <a href="http://www.nike.com/us/en_us/c/nikeplus-fuelband" title="Nike">Nike Fuelband</a>, or <a href="https://jawbone.com/up" title="Jawbone">Jawbone Up</a>). 
 This is two months worth of data from this individual, taken during the months of October and November.  </p>
 
 <p>It contains three columns of data:</p>
@@ -377,11 +377,6 @@ on that day of the week. Here is how I would do that:</p>
 <pre><code class="r">updated.table &lt;- activity.table
 updated.table &lt;- merge(updated.table, avgStepsPerWeekday, by.x=c(&quot;interval&quot;,&quot;weekday&quot;))
 </code></pre>
-
-<p>[1] <a href="https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip">https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip</a> &ldquo;Data&rdquo;
-[2] <a href="http://www.fitbit.com/">http://www.fitbit.com/</a> &ldquo;Fitbit&rdquo;
-[3] <a href="http://www.nike.com/us/en_us/c/nikeplus-fuelband">http://www.nike.com/us/en_us/c/nikeplus-fuelband</a> &ldquo;Nike&rdquo;
-[4] <a href="https://jawbone.com/up">https://jawbone.com/up</a> &ldquo;Jawbone&rdquo;</p>
 
 </body>
 
