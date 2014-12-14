@@ -1,0 +1,125 @@
+Reproducible Research Peer Assignment #1
+==========================
+
+# Data Description
+
+The data can be downloaded from the course website ([link][1]). This data was the number 
+of steps taken in 5 minute intervals each day, taken from an anonymous individual using a 
+personal activity monitoring device (like a [Fitbit][2], [Nike Fuelband][3], or [Jawbone Up][4]). 
+This is two months worth of data from this individual, taken during the months of October and November.  
+
+It contains three columns of data:
+- **steps**: Number of steps taken in a five minute interval (missing values are "NA")
+- **date**: The date on which the measurement was taken in YYYY-MM-DD format
+- **interval**: The start of the 5-minute interval in which the measurement was taken (in military time)  
+
+This document describes an analysis performed on this data.  
+
+# Step 1: Load and preprocess the data
+
+## Load the data
+
+To handle situations where the data is not in the same directory as the working one, I usually
+prompt the user to give the program the directory in which the data resides:
+
+```{r promptDir}
+activity.table <- read.csv("activity.csv")
+```
+
+## Number of NA values and where are they?
+
+A quick check shows that there are `r sum(is.na(activity.table$steps))` NA values for "steps" 
+taken and that there are 288 measurements for each day of recording (which is equal to the 
+number of 5 minute intervals in the day: 24 hrs * 60 minutes / 5 = 288).  
+
+```{r summaryStats}
+summary(activity.table$steps)
+summary(activity.table$date)
+```
+
+## How will we impute the NA values?
+
+I decided to fill on NA values based on the average steps for each interval for that weekday.
+To do that, I needed to add a column for weekday. I do this by utilizing the POSIXlt class
+to convert the date to a date object, and then extracting the weekday from that object. In
+addition, in order to compare weekdays to weekends, I created a variable that coded that as well. 
+
+```{r addWeekdays}
+activity.table$weekday <- weekdays(as.POSIXlt(activity.table$date))
+activity.table$dayType <- as.factor(activity.table[,"weekday"] %in% c("Sunday", "Saturday"))
+levels(activity.table$dayType) <- c("weekday","weekend")
+```
+
+## How will we preprocess the data to do our analysis? 
+
+To do the analysis of total steps per day and average over each interval, I need to create
+respective tables that aggregate along each day and along each interval. In addition, to 
+fill in the NA values later on, I need a table that aggregates along both weekday and
+interval.  
+
+```{r totalStepsPerDay}
+totalStepsPerDay <- aggregate(activity.table$steps, by=list(activity.table$date), sum)
+avgStepsPerInterval <- aggregate(activity.table$steps, by=list(activity.table$interval), mean, na.rm=T)
+avgStepsPerWeekday <- aggregate(activity.table$steps, by=list(activity.table$weekday, activity.table$interval), mean, na.rm=T)
+```
+
+```{r renaming, echo=F, results="hide"}
+names(totalStepsPerDay) <- c("date","totalSteps")
+names(avgStepsPerInterval) <- c("interval","avgSteps")
+names(avgStepsPerWeekday) <- c("weekday","interval","avgSteps")
+```
+
+## Summary of transformations
+
+This is a sample of what the tables look like after this transformation:
+```{r summaryTables, echo=F}
+head(activity.table)
+head(totalStepsPerDay)
+head(avgStepsPerInterval)
+head(avgStepsPerWeekday)
+```
+
+# Step 2: What is mean total number of steps taken per day?
+
+## Histogram of the Total Steps Taken Per Day
+
+```{r totalStepsPlot, echo=F}
+library(ggplot2)
+qplot(as.POSIXct(totalStepsPerDay$date),totalStepsPerDay$totalSteps,geom="histogram",stat="identity",xlab="Date",ylab="Total Steps")
+```
+
+## Mean and Median Total Steps Taken Per Day
+
+```{r meanAndMedian}
+mean(totalStepsPerDay$totalSteps, na.rm=T)
+median(totalStepsPerDay$totalSteps, na.rm=T)
+```
+
+# Step 3: What is the average daily activity pattern?
+
+### Time Series Plot of Average Steps Taken Over Each 5-minute Interval Across All Days
+Here is a time series plot of the average steps taken during each 5-minute interval across the day:
+```{r avgStepsAcrossDay, echo=F}
+plot(avgStepsPerInterval$interval, avgStepsPerInterval$avgSteps, type="l", xlab="5-minute Interval (Military Time)", ylab="Avg Steps", xaxt="n")
+axis(1, at=seq(0,2400,100),labels=seq(0,2400,100))
+```
+
+### The 5-minute interval with the most average number of steps?
+
+The 5-minute interval with the maximum number of steps, as seen in the graph, was 
+`r avgStepsPerInterval[max(avgStepsPerInterval$avgSteps),"interval"]`.
+
+# Step 4: Imputing Missing Values
+
+As mentioned above, I decided to impute missing values based on the average steps for an interval
+on that day of the week. Here is how I would do that:
+
+```{r imputeMissingValues}
+updated.table <- activity.table
+updated.table <- merge(updated.table, avgStepsPerWeekday, by.x=c("interval","weekday"))
+```
+
+[1] https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip "Data"
+[2] http://www.fitbit.com/ "Fitbit"
+[3] http://www.nike.com/us/en_us/c/nikeplus-fuelband "Nike"
+[4] https://jawbone.com/up "Jawbone"
