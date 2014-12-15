@@ -270,10 +270,9 @@ number of 5 minute intervals in the day: 24 hrs * 60 minutes / 5 = 288).  </p>
 ##        288
 </code></pre>
 
-<h2>How will we impute the NA values?</h2>
+<h2>How will we transform the data to do the analysis?</h2>
 
-<p>I decided to fill on NA values based on the average steps for each interval for that weekday.
-To do that, I needed to add a column for weekday. I do this by utilizing the POSIXlt class
+<p>To do the last section, I needed to add a column for weekday. I do this by utilizing the POSIXlt class
 to convert the date to a date object, and then extracting the weekday from that object. In
 addition, in order to compare weekdays to weekends, I created a variable that coded that as well. </p>
 
@@ -281,8 +280,6 @@ addition, in order to compare weekdays to weekends, I created a variable that co
 activity.table$dayType &lt;- as.factor(activity.table[,&quot;weekday&quot;] %in% c(&quot;Sunday&quot;, &quot;Saturday&quot;))
 levels(activity.table$dayType) &lt;- c(&quot;weekday&quot;,&quot;weekend&quot;)
 </code></pre>
-
-<h2>How will we preprocess the data to do our analysis?</h2>
 
 <p>To do the analysis of total steps per day and average over each interval, I need to create
 respective tables that aggregate along each day and along each interval. In addition, to 
@@ -334,7 +331,7 @@ avgStepsPerWeekday &lt;- aggregate(activity.table$steps, by=list(activity.table$
 ## 6  Tuesday        0 0.000000
 </code></pre>
 
-<h1>Step 2: What is mean total number of steps taken per day?</h1>
+<h1>Step 2: Mean Total Number of Steps Per Day</h1>
 
 <h2>Histogram of the Total Steps Taken Per Day</h2>
 
@@ -371,12 +368,13 @@ avgStepsPerWeekday &lt;- aggregate(activity.table$steps, by=list(activity.table$
 
 <h1>Step 4: Imputing Missing Values</h1>
 
-<p>As mentioned above, I decided to impute missing values based on the average steps for an interval
-on that day of the week. Here is how I would do that:</p>
+<p>As mentioned above, I decided to impute missing values based on the average steps for an interval. Here is how I would do that:</p>
 
 <pre><code class="r">updated.table &lt;- activity.table
-updated.table &lt;- merge(updated.table, avgStepsPerWeekday, by.x=c(&quot;interval&quot;,&quot;weekday&quot;))
+updated.table[is.na(updated.table$steps),&quot;steps&quot;] &lt;- apply(updated.table[is.na(updated.table$steps),], 1, function(x) avgStepsPerInterval[which(avgStepsPerInterval$interval==as.integer(x[3])),&quot;avgSteps&quot;])
 </code></pre>
+
+<h1>Step 5: Weekday vs Weekend</h1>
 
 </body>
 
